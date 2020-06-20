@@ -50,6 +50,7 @@ Elasticsearch에서 가장 큰 시스템 단위를 의미
 > * 데이터 입력 시 어느 shard에 할당할 것인지
 ##### data node
 > 데이터와 관련된 CRUD 작업과 관련있는 노드
+
 > 이 노드는 CPU, 메모리 등 자원을 많이 소모하므로 모니터링이 필요하며, master노드와 분리되는 것이 좋다.
 ##### ingest node
 > 데이터를 변환하는 등 사전 처리 파이프라인을 실행하는 역할을 한다.
@@ -83,8 +84,11 @@ Json문서를 통해 데이터 검색을 수행하므로 스키마 개념이 없
 #### Restful
 데이터 CURD 작업은 HTTP Restful API를 통해 수행한다.
 > SELECT -> GET
+
 > INSERT -> POST
+
 > UPDATE -> PUT
+
 > DELETE -> DELETE
 ### 2.3. 역색인
 Elasticsearch가 빠른 이유는 역색인(inverted index)에 있다.
