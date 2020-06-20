@@ -22,10 +22,10 @@ Apache Lucene 기반의 Java 오픈소스 분산검색 엔진
 #### Beats
 서버에 에이전트로 설치하여 다양한 유형의 데이터를 Elastic Search 또는 Logstash에 전송하는 오픈 소스 데이터 발송자.
 ## 2. Elastic Search
-## 2.1. 개념
-### 1. Near Realtime
+### 2.1. 개념
+#### 1. Near Realtime
 거의 실시간 검색 플랫폼이라는 특징을 가짐
-### 2. Cluster
+#### 2. Cluster
 전체 데이터를 함께 보유하고 모든 노드에서 연합 인덱싱 및 검색 기능을 제공하는 하나 이상의 노드 모음.
 
 Elasticsearch에서 가장 큰 시스템 단위를 의미
@@ -35,7 +35,7 @@ Elasticsearch에서 가장 큰 시스템 단위를 의미
 서로 다른 cluster는 데이터의 접근, 교환을 할 수 없는 독립적인 시스템으로 유지
 
 여러 대의 서버가 하나의 클러스터를 구성할 수 있고, 한 서버에 여러 개의 클러스터가 존재할 수 있다.
-### 3. Node
+#### 3. Node
 클러스터의 일부이며 데이터를 저장하고 클러스터의 인덱싱 및 검색 기능에 참여하는 단일 서버
 
 노드에 할당되는 임의 UUID인 이름으로 식별
@@ -43,50 +43,50 @@ Elasticsearch에서 가장 큰 시스템 단위를 의미
 특정 클러스터를 클러스터 이름으로 결합하도록 노드를 구성할 수 있음
 
 역할에 따라 master-eligible, data, ingest, tribe 노드로 구분
-#### master-eligible
+##### master-eligible
 > 클러스터를 제어하는 마스터로 선택할 수 있는 노드
 > * 인덱스 생성, 삭제
 > * 클러스터 노드들의 추적, 관리
 > * 데이터 입력 시 어느 shard에 할당할 것인지
-#### data node
+##### data node
 > 데이터와 관련된 CRUD 작업과 관련있는 노드
 > 이 노드는 CPU, 메모리 등 자원을 많이 소모하므로 모니터링이 필요하며, master노드와 분리되는 것이 좋다.
-#### ingest node
+##### ingest node
 > 데이터를 변환하는 등 사전 처리 파이프라인을 실행하는 역할을 한다.
-#### coordination only node
+##### coordination only node
 > data node와 master-eligible node의 일을 대신하는 이 노드는 대규모 클러스터에서 큰 이점이 있다.
-### 4. Index (관계형 DB의 database)
+#### 4. Index (관계형 DB의 database)
 다소 유사한 특성을 갖는 문서들의 집합
 
 단일 클러스터에서 원하는 만큼의 인덱스를 정의할 수 있음.
-### 5. Type (관계형 DB의 Table)
+#### 5. Type (관계형 DB의 Table)
 Index 내에서 하나 이상의 Type을 정의할 수 있음.
-### 6. Document (관계형 DB의 row)
+#### 6. Document (관계형 DB의 row)
 Index를 생성할 수 있는 기본 정보 단위
 
 JSON으로 표현
-### 7. Shards
+#### 7. Shards
 Index는 잠재적으로 단일 노드의 하드웨어 제한을 초과할 수 있는 많은 양의 데이터를 저장할 수 있다. 하지만 단일 노드의 디스크가 맞지 않거나 단일 노드의 검색 요청만 처리하기에는 너무 느릴 수 있기 때문에 shards를 이용하여 index를 여러 조각으로 나눌 수 있다.
 
 수평적으로 콘텐츠 볼륨을 split/scale 가능하다.
 
 여러 노드에서 잠재적으로 분산을 통해 작업을 분산 및 병렬 처리를 할 수 있으므로 성능/처리량이 향상된다.
-### 8. Replication
+#### 8. Replication
 장애가 발생할 경우 고가용성을 제공. 그렇기 때문에 복제본 shard는 복사된 원본/기본 shard와 동일한 노드에 할당되지 않는다.
-## 2.2. 특징
-### Scale out
+### 2.2. 특징
+#### Scale out
 샤드를 통해 규모가 수평적으로 늘어날 수 있다
-### 고가용성
+#### 고가용성
 Replica를 통해 데이터의 안정성을 보장
-### Schema Free
+#### Schema Free
 Json문서를 통해 데이터 검색을 수행하므로 스키마 개념이 없다
-### Restful
+#### Restful
 데이터 CURD 작업은 HTTP Restful API를 통해 수행한다.
 > SELECT -> GET
 > INSERT -> POST
 > UPDATE -> PUT
 > DELETE -> DELETE
-## 2.3. 역색인
+### 2.3. 역색인
 Elasticsearch가 빠른 이유는 역색인(inverted index)에 있다.
 
 Elasticsearch는 텍스트를 파싱해서 검색어 사전을 만든 다음, inverted index방식으로 텍스트를 저장한다.
