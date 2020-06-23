@@ -61,6 +61,217 @@ but, 데이터가 방대해짐에 따라 키워드가 많아지면 ES의 search 
 <데이터 접근 명령어 차이>  
 
 ## 2. Elastic Search 데이터 입력 조회 삭제
+### 2.1. 데이터 입력 조회 삭제
+
+ES는 REST API 사용
+#### REST API 
+HTTP 기반으로 필요한 자원에 접근하는 방식을 정해놓은 아키텍쳐  
+자원별로 고유 URL로 접근이 가능  
+http 메서드 GET, PUT, POST, DELETE를 이용해서 자원을 처리  
+-> 이러한 특성을 가진 시스템을 RESTful한 시스템이라 말한다.  
+
+RESTful한 시스템 ex)
+
+    PUT https://user.com/iamhge -d {"name":"IHG", "age":22, "gender":"f"}
+    GET https://user.com/iamhge
+    DELETE https://user.com/iamhge
+
+|Elastic Search|Relational DB|CRUD|
+|---|---|---|
+|GET|Select|Read|
+|PUT|Update|Update|
+|POST|Insert|Create|
+|DELETE|Delete|Delete|
+
+<ES, RDB, CRUD 비교>
+
+elastic search 내에 index 유무 확인
+
+    $ curl -XGET http://localhost:9200/<조회할 index명>?pretty
+    $ curl -XGET http://localhost:9200/?pretty
+
+GET : data 읽음
+curl : ubuntu에서 REST API 보내기 위해 curl 커멘드 사용
+-X : Prefix
+?pretty : 결과값을 깔끔하게 확인하기 위한 명령 (json type)
+status 404가 뜨면 해당 index가 없다는 의미
+
+index 생성
+
+    $ curl -XPUT http://localhost:9200/<만들 index명>?pretty
+    $ curl -XPUT http://localhost:9200/classes?pretty
+    
+true가 뜨면 index 생성됐다는 의미
+
+index 삭제
+
+    $ curl -XDELETE http://localhost:9200/<삭제할 index명>?pretty
+    $ curl -XDELETE http://localhost:9200/classes?pretty
+    
+true가 뜨면 index 삭제됐다는 의미
+
+document 생성
+index가 없어도 생성이 가능하다.
+index명과 type명을 명시해주면 document 생성 가능
+
+    $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d '{ : }'
+    $ curl -XPOST http://localhost:9200/classes/class/1/ -d '{"title":"Algorithm", "professor":"John"}'
+    
+-d option
+
+파일에 저장된 document 생성
+
+    $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d @<파일명>
+    $ curl -XPOST http://localhost:9200/classes/class/1/ -d @oneclass.json
+
+------------
+
+엘라스틱 서치 데이터 업데이트
+
+document update  
+
+    $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<update할 document명>":<update할 data>}}'
+    $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 1학점임을 추가함
+
+document 수정
+
+    $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<수정할 document명>":<수정할 data>}}'
+    $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 2학점이라 수정
+
+script를 사용해 값을 변경
+
+    $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"script":"ctx.\_source.unit += 5"}' // 2학점에서 5학점을 올려 7학점으로 수정
 
 
-2.1 
+
+
+------------
+
+엘라스틱 서치 벌크
+
+여러개의 document를 한번에 ES에 삽입
+
+    $ curl -XPOST http://localhost:9200/\_bulk?pretty --data-binary @<파일명>
+    $ curl -XPOST http://localhost:9200/\_bulk?pretty --data-binary @classes.json
+
+--data-binary : 파일으로부터 document 삽입
+
+
+-------------
+엘라스틱서치 매핑 (Mapping)(RDB의 schema)
+
+mapping 없이 ES에 data를 넣을 수 있는가?
+할 수 있다. 하지만 mapping없이 data를 넣는 것은 상당히 위험한 일.
+ex) 숫자 정보를 입력하였지만, ES는 문자로 인식할 수 있다.
+
+잘못지정된 type 때문에 kibana 등에서 잘못된 visualization 가능.
+
+so, data를 관리할 때는 mapping을 추가해야한다.
+
+mapping 채우기
+
+    $ curl -XPUT 'http://localhost:9200/<index명>/<type명>/\_mapping' -d @<파일명>
+    $ curl -XPUT 'http://localhost:9200/classes/class/\_mapping' -d @classesRating_mapping.json
+   
+mapping 완료 후 document를 삽입한다.
+
+-------------
+엘라스틱서치 데이터 조회 (Search)
+
+    $ curl -XGET localhost:9200/<index명>/<type명>\_search?pretty
+    $ curl -XGET localhost:9200/basketball/record\_search?pretty
+
+URI 옵션
+
+    $ curl -XGET localhost:9200/<index명>/<type명>\_search?q=<search할 data명>:<search할 data 값>&pretty
+    $ curl -XGET 'localhost:9200/basketball/record\_search?q=points:30&pretty' // query는 points가 30인 것만 보여줘라
+
+q : query
+
+request body를 이용한 search
+
+    $ curl -XGET 'localhost:9200/<index명>/<type명>\_search -d'
+    {
+        "query":{
+            " ":{" ": }
+        }
+    }
+    $ curl -XGET 'localhost:9200/basketball/record\_search -d'
+    {
+        "query":{
+            "term":{"points":30}
+        }
+    }
+    
+request body에는 여러가지 옵션이 있다
+
+
+-----------
+엘라스틱서치 메트릭 어그리게이션 (Metric Aggregation)
+
+aggregation
+엘라스틱서치 안에 있는 document의 조합을 통해 어떠한 값을 도출할 때 쓰이는 방법
+
+metric aggregation
+산술할 때 쓰임 ex) 평균, 최댓값, 최솟값 구할 때
+
+aggregation format
+
+    "aggregations":{
+        "<aggregation_name>":{
+            "<aggregation_type>":{
+                <aggregation_body>
+            }
+            [, "meta":{ [<meta_data_body>] } ]?
+            [, "aggregations":{ [<sub_aggregation>]+ } ]?
+        }
+        [, "<aggregation_name_2>":{ ... } ]*
+    }
+    
+ex) points의 평균값 구하기
+
+    {
+        "size":0, // 여러개의 정보가 도출되는 대신, aggregation 정보만 보기위해 size = 0으로
+        "aggs":{  // aggregations
+            "avg_score":{  // aggregation name
+                "avg":{  // aggregation type
+                    "field":"points"  // aggregation body
+                }
+            }
+        }
+    }
+   
+aggregation search 명령어
+
+    $ curl -XGET localhost:9200/\_search?pretty --data-binary @<파일명>
+
+aggs = aggregations  
+avg : 평균값을 구할 것이다.  
+
+원하는 결과값을 구하기 위해 <aggregation_type> 필드를 변경해본다.  
+ex) max, min, sum, ..  
+
+stats를 aggregation_name으로 사용하면 aggregation으로 구했던 모든 값들이 함께 출력된다.
+
+
+--------------
+엘라스틱서치 버켓 어그리게이션 (Bucket Aggregation)
+
+bucket aggregation
+group by : document들을 group지어준다.
+
+ex) team별로 document를 묶기 (terms_aggs.json파일)
+
+    {
+        "size":0, // 여러개의 정보가 도출되는 대신, aggregation 정보만 보기위해 size = 0으로
+        "aggs":{  // aggregations
+            "players":{  // aggregation name
+                "terms":{  // aggregation type
+                    "field":"team"  // aggregation body
+                }
+            }
+        }
+    }
+
+
+
