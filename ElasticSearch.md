@@ -9,10 +9,21 @@ ex) document 1, 2, 3에 따라 name과 professor가 채워져있다.
 <elasticsearch의 data flow>  
 
 ### 1.2. 저장방식의 차이
-![ES_es_index](./elk_image/ES_es_index.PNG)  
-<ES의 저장방식에 따른 index>
+|Text|Document|
+|---|---|
+|John|doc1, doc2|
+|Database|doc1, doc3|
+|Tom|doc3|
+|Algorithm|doc2|
 
-![ES_rdb_table](./elk_image/ES_rdb_table.PNG)  
+<ES의 저장방식에 따른 index>  
+
+|Documnet|context|
+|---|---|
+|doc1|"class":{  "name":"database"  "professor":"John"  }|
+|doc2|"class":{  "name":"algorithm"  "professor":"John"  }|
+|doc3|"class":{  "name":"database"  "professor":"Tom"  }|
+
 <관계형 데이터 베이스의 저장방식에 따른 database>
 
 #### ES
@@ -26,9 +37,30 @@ ex) document 1, 2, 3에 따라 name과 professor가 채워져있다.
 so, 위와 같은 검색에서는 ES의 search가 매우 빠르게 된다.  
 but, 데이터가 방대해짐에 따라 키워드가 많아지면 ES의 search 속도가 느려지게 되며, 관계형 DB를 사용함이 나을 수 있다.  
 
-![ES_es_vs_rdb_table](./elk_image/ES_es_vs_rdb_table.PNG)  
+|Elastic Search|Relational DB|
+|---|---|
+|Index|Database|
+|Type|Table|
+|Document|Row|
+|Field|Column|
+|Mapping|Schema|
+|Shard|Physical partition|
+|Route|Logical partition|
+|Parent/child, nested|Relational|
+|Query dsl|sql|
+
 <용어 차이>  
 
-![ES_es_vs_rdb_table2](./elk_image/ES_es_vs_rdb_table2.PNG)  
-<명령어 차이>  
+|Elastic Search|Relational DB|
+|---|---|
+|GET|Select|
+|PUT|Update|
+|POST|Insert|
+|DELETE|Delete|
 
+<데이터 접근 명령어 차이>  
+
+## 2. Elastic Search 데이터 입력 조회 삭제
+
+
+2.1 
