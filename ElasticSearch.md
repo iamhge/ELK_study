@@ -5,7 +5,7 @@
 elasticsearch의 data flow는 아래 그림과 같다.  
 document 1, 2, 3에 따라 name과 professor가 채워져있다.  
 그리고 document들을 Text에 따라 매칭시켜 indexing하여 저장한다.  
-이렇게 저장한 index를 사용자가 search하게 되는 구조이다.
+이렇게 저장한 index를 사용자가 search하게 되는 구조이다.  
 ![ES_dataflow](./elk_image/ES_dataflow)  
 
 ### 1.2. 저장방식의 차이
