@@ -84,58 +84,59 @@ ex) RESTful한 시스템
 
 <ES, RDB, CRUD 비교>
 
-* elastic search 내에 index 유무 확인
-```
-$ curl -XGET http://localhost:9200/<조회할 index명>?pretty
-$ curl -XGET http://localhost:9200/?pretty
-```
-    * GET : data 읽음   
-    * curl : ubuntu에서 REST API 보내기 위해 curl 커멘드 사용   
-    * -X : Prefix   
-    * ?pretty : 결과값을 깔끔하게 확인하기 위한 명령 (json type)   
-    * status 404가 뜨면 해당 index가 없다는 의미   
+elastic search 내에 index 유무 확인
+
+    $ curl -XGET http://localhost:9200/<조회할 index명>?pretty
+    $ curl -XGET http://localhost:9200/?pretty
+
+* GET : data 읽음   
+* curl : ubuntu에서 REST API 보내기 위해 curl 커멘드 사용   
+* -X : Prefix   
+* ?pretty : 결과값을 깔끔하게 확인하기 위한 명령 (json type)   
+* status 404가 뜨면 해당 index가 없다는 의미   
 
 ### 2.2. index와 document
 
-* index 생성
+index 생성
 
     $ curl -XPUT http://localhost:9200/<만들 index명>?pretty
     $ curl -XPUT http://localhost:9200/classes?pretty
     
 * true가 뜨면 index 생성됐다는 의미
 
-* index 삭제
+index 삭제
 
     $ curl -XDELETE http://localhost:9200/<삭제할 index명>?pretty
     $ curl -XDELETE http://localhost:9200/classes?pretty
     
-    * true가 뜨면 index 삭제됐다는 의미
+* true가 뜨면 index 삭제됐다는 의미
 
-* document 생성
-    * index가 없어도 생성이 가능하다.
-    * index명과 type명을 명시해주면 document 생성 가능
+document 생성
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d '{ : }'
     $ curl -XPOST http://localhost:9200/classes/class/1/ -d '{"title":"Algorithm", "professor":"John"}'
 
-* 파일에 저장된 document 생성
- ```
+* index가 없어도 생성이 가능하다.
+* index명과 type명을 명시해주면 document 생성 가능
+
+파일에 저장된 document 생성
+
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d @<파일명>
     $ curl -XPOST http://localhost:9200/classes/class/1/ -d @oneclass.json
- ```
+
 ### 2.3. data update
 
-* document update  
+document update  
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<update할 document명>":<update할 data>}}'
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 1학점임을 추가함
 
-* document 수정
+document 수정
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<수정할 document명>":<수정할 data>}}'
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 2학점이라 수정
 
-* script를 사용해 값을 변경
+script를 사용해 값을 변경
 
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"script":"ctx.\_source.unit += 5"}' // 2학점에서 5학점을 올려 7학점으로 수정
 
@@ -146,36 +147,37 @@ $ curl -XGET http://localhost:9200/?pretty
     $ curl -XPOST http://localhost:9200/\_bulk?pretty --data-binary @<파일명>
     $ curl -XPOST http://localhost:9200/\_bulk?pretty --data-binary @classes.json
 
---data-binary : 파일으로부터 document 삽입
+--data-binary : 파일으로부터 document 삽입  
 
 ### 2.5. Mapping(RDB의 schema)
 
-mapping 없이 ES에 data를 넣을 수 있는가?
-할 수 있다. 하지만 mapping없이 data를 넣는 것은 상당히 위험한 일.
-ex) 숫자 정보를 입력하였지만, ES는 문자로 인식할 수 있다.
+Q. mapping 없이 ES에 data를 넣을 수 있는가?  
+A. 할 수 있다. 하지만 mapping없이 data를 넣는 것은 상당히 위험한 일.  
+ex) 숫자 정보를 입력하였지만, ES는 문자로 인식할 수 있다.  
 
-잘못지정된 type 때문에 kibana 등에서 잘못된 visualization 가능.
-
-so, data를 관리할 때는 mapping을 추가해야한다.
+* 잘못지정된 type 때문에 kibana 등에서 잘못된 visualization 가능.
+* so, data를 관리할 때는 mapping을 추가해야한다.
 
 mapping 채우기
 
     $ curl -XPUT 'http://localhost:9200/<index명>/<type명>/\_mapping' -d @<파일명>
     $ curl -XPUT 'http://localhost:9200/classes/class/\_mapping' -d @classesRating_mapping.json
    
-mapping 완료 후 document를 삽입한다.
+* mapping 완료 후 document를 삽입한다.
 
 ### 2.6. Search
+
+search
 
     $ curl -XGET localhost:9200/<index명>/<type명>\_search?pretty
     $ curl -XGET localhost:9200/basketball/record\_search?pretty
 
-URI 옵션
+URI 옵션을 통한 search
 
     $ curl -XGET localhost:9200/<index명>/<type명>\_search?q=<search할 data명>:<search할 data 값>&pretty
     $ curl -XGET 'localhost:9200/basketball/record\_search?q=points:30&pretty' // query는 points가 30인 것만 보여줘라
 
-q : query
+* q : query
 
 request body를 이용한 search
 
@@ -192,14 +194,15 @@ request body를 이용한 search
         }
     }
     
-request body에는 여러가지 옵션이 있다.  
++) request body에는 여러가지 옵션이 있다.  
+
 ### 2.7. Aggregation
-aggregation?
+aggregation
 * 엘라스틱서치 안에 있는 document의 조합을 통해 어떠한 값을 도출할 때 쓰이는 방법
 
 #### 2.7.1. Metric Aggregation
 metric aggregation
-산술할 때 쓰임 ex) 평균, 최댓값, 최솟값 구할 때
+* 산술할 때 쓰임 ex) 평균, 최댓값, 최솟값 구할 때
 
 aggregation format
 
@@ -231,20 +234,17 @@ aggregation search 명령어
 
     $ curl -XGET localhost:9200/\_search?pretty --data-binary @<파일명>
 
-aggs = aggregations  
-avg : 평균값을 구할 것이다.  
+* aggs = aggregations  
+* avg : 평균값을 구할 것이다.  
 
-원하는 결과값을 구하기 위해 <aggregation_type> 필드를 변경해본다.  
-ex) max, min, sum, ..  
+* 원하는 결과값을 구하기 위해 <aggregation_type> 필드를 변경해본다.   
+* ex) max, min, sum, ..  
 
-stats를 aggregation_name으로 사용하면 aggregation으로 구했던 모든 값들이 함께 출력된다.
-
-
---------------
+* stats를 aggregation_name으로 사용하면 aggregation으로 구했던 모든 값들이 함께 출력된다.
 #### 2.7.2. Bucket Aggregation
 
 bucket aggregation
-group by : document들을 group지어준다.
+* group by : document들을 group지어준다.  
 
 ex) team별로 document를 묶기 (terms_aggs.json파일)
 
@@ -258,6 +258,3 @@ ex) team별로 document를 묶기 (terms_aggs.json파일)
             }
         }
     }
-
-
-
