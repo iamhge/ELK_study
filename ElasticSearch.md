@@ -60,17 +60,16 @@ but, 데이터가 방대해짐에 따라 키워드가 많아지면 ES의 search 
 
 <데이터 접근 명령어 차이>  
 
-## 2. Elastic Search 데이터 입력 조회 삭제
-### 2.1. 데이터 입력 조회 삭제
-
-ES는 REST API 사용
+## 2. 데이터 입력, 조회, 삭제
+### 2.1. 
+* ES는 REST API를 사용한다.
 #### REST API 
-HTTP 기반으로 필요한 자원에 접근하는 방식을 정해놓은 아키텍쳐  
-자원별로 고유 URL로 접근이 가능  
-http 메서드 GET, PUT, POST, DELETE를 이용해서 자원을 처리  
--> 이러한 특성을 가진 시스템을 RESTful한 시스템이라 말한다.  
+* HTTP 기반으로 필요한 자원에 접근하는 방식을 정해놓은 아키텍쳐  
+* 자원별로 고유 URL로 접근이 가능  
+* http 메서드 GET, PUT, POST, DELETE를 이용해서 자원을 처리  
+* 이러한 특성을 가진 시스템을 RESTful한 시스템이라 말한다.  
 
-RESTful한 시스템 ex)
+ex) RESTful한 시스템
 
     PUT https://user.com/iamhge -d {"name":"IHG", "age":22, "gender":"f"}
     GET https://user.com/iamhge
@@ -85,69 +84,62 @@ RESTful한 시스템 ex)
 
 <ES, RDB, CRUD 비교>
 
-elastic search 내에 index 유무 확인
+* elastic search 내에 index 유무 확인
+```
+$ curl -XGET http://localhost:9200/<조회할 index명>?pretty
+$ curl -XGET http://localhost:9200/?pretty
+```
+    * GET : data 읽음   
+    * curl : ubuntu에서 REST API 보내기 위해 curl 커멘드 사용   
+    * -X : Prefix   
+    * ?pretty : 결과값을 깔끔하게 확인하기 위한 명령 (json type)   
+    * status 404가 뜨면 해당 index가 없다는 의미   
 
-    $ curl -XGET http://localhost:9200/<조회할 index명>?pretty
-    $ curl -XGET http://localhost:9200/?pretty
+### 2.2. index와 document
 
-GET : data 읽음
-curl : ubuntu에서 REST API 보내기 위해 curl 커멘드 사용
--X : Prefix
-?pretty : 결과값을 깔끔하게 확인하기 위한 명령 (json type)
-status 404가 뜨면 해당 index가 없다는 의미
-
-index 생성
+* index 생성
 
     $ curl -XPUT http://localhost:9200/<만들 index명>?pretty
     $ curl -XPUT http://localhost:9200/classes?pretty
     
-true가 뜨면 index 생성됐다는 의미
+* true가 뜨면 index 생성됐다는 의미
 
-index 삭제
+* index 삭제
 
     $ curl -XDELETE http://localhost:9200/<삭제할 index명>?pretty
     $ curl -XDELETE http://localhost:9200/classes?pretty
     
-true가 뜨면 index 삭제됐다는 의미
+    * true가 뜨면 index 삭제됐다는 의미
 
-document 생성
-index가 없어도 생성이 가능하다.
-index명과 type명을 명시해주면 document 생성 가능
+* document 생성
+    * index가 없어도 생성이 가능하다.
+    * index명과 type명을 명시해주면 document 생성 가능
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d '{ : }'
     $ curl -XPOST http://localhost:9200/classes/class/1/ -d '{"title":"Algorithm", "professor":"John"}'
-    
--d option
 
-파일에 저장된 document 생성
-
+* 파일에 저장된 document 생성
+ ```
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/{id}/ -d @<파일명>
     $ curl -XPOST http://localhost:9200/classes/class/1/ -d @oneclass.json
+ ```
+### 2.3. data update
 
-------------
-
-엘라스틱 서치 데이터 업데이트
-
-document update  
+* document update  
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<update할 document명>":<update할 data>}}'
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 1학점임을 추가함
 
-document 수정
+* document 수정
 
     $ curl -XPOST http://localhost:9200/<index명>/<type명>/<id>/\_update -d '{"doc":"<수정할 document명>":<수정할 data>}}'
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"doc":{"unit":1}}' // 2학점이라 수정
 
-script를 사용해 값을 변경
+* script를 사용해 값을 변경
 
     $ curl -XPOST http://localhost:9200/classes/class/1/\_update -d '{"script":"ctx.\_source.unit += 5"}' // 2학점에서 5학점을 올려 7학점으로 수정
 
-
-
-
-------------
-
-엘라스틱 서치 벌크
+### 2.4. bulk
 
 여러개의 document를 한번에 ES에 삽입
 
@@ -156,9 +148,7 @@ script를 사용해 값을 변경
 
 --data-binary : 파일으로부터 document 삽입
 
-
--------------
-엘라스틱서치 매핑 (Mapping)(RDB의 schema)
+### 2.5. Mapping(RDB의 schema)
 
 mapping 없이 ES에 data를 넣을 수 있는가?
 할 수 있다. 하지만 mapping없이 data를 넣는 것은 상당히 위험한 일.
@@ -175,8 +165,7 @@ mapping 채우기
    
 mapping 완료 후 document를 삽입한다.
 
--------------
-엘라스틱서치 데이터 조회 (Search)
+### 2.6. Search
 
     $ curl -XGET localhost:9200/<index명>/<type명>\_search?pretty
     $ curl -XGET localhost:9200/basketball/record\_search?pretty
@@ -203,15 +192,12 @@ request body를 이용한 search
         }
     }
     
-request body에는 여러가지 옵션이 있다
+request body에는 여러가지 옵션이 있다.  
+### 2.7. Aggregation
+aggregation?
+* 엘라스틱서치 안에 있는 document의 조합을 통해 어떠한 값을 도출할 때 쓰이는 방법
 
-
------------
-엘라스틱서치 메트릭 어그리게이션 (Metric Aggregation)
-
-aggregation
-엘라스틱서치 안에 있는 document의 조합을 통해 어떠한 값을 도출할 때 쓰이는 방법
-
+#### 2.7.1. Metric Aggregation
 metric aggregation
 산술할 때 쓰임 ex) 평균, 최댓값, 최솟값 구할 때
 
@@ -255,7 +241,7 @@ stats를 aggregation_name으로 사용하면 aggregation으로 구했던 모든 
 
 
 --------------
-엘라스틱서치 버켓 어그리게이션 (Bucket Aggregation)
+#### 2.7.2. Bucket Aggregation
 
 bucket aggregation
 group by : document들을 group지어준다.
