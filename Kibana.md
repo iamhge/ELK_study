@@ -77,4 +77,3 @@ Tile map을 선택한다.
 1. visualize tab에서 원하는 chart를 save한다.  
 2. dashboard tab에서 save한 chart를 선택하여 dashboard에 나타낸다.  
 3. 직접 드래그하여 각각의 chart 크기, 위치를 수정하여 꾸민다. 
-
