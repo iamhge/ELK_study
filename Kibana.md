@@ -39,10 +39,13 @@ Absolute 필드
 
 ### 1.3.2. table information
 
-* 원하는 정보만 보고 싶으면 table에서 돋보기 형태를 클릭하여 그래프에 원하는 정보만 띄울 수 있다. 
-
+* 원하는 정보만 보고 싶으면 table에서 돋보기 형태를 클릭하여 그래프에 원하는 정보만 띄울 수 있다.  
 * table에서 원하는 정보만 보고 싶다면, toggle 버튼을 클릭하여 table에 원하는 정보만 띄울 수 있다.  
+![ELK_modify_toggle_1](./elk_image/ELK_modify_toggle_1.png)  
+<화살표가 가리키는 ▶ 표시를 클릭하여 document를 크게 확인한다.>  
 
+![ELK_modify_toggle_result](./elk_image/ELK_modify_toggle_result.png)  
+<toggle을 클릭하여 원하는 정보만 출력한 결과>  
 
 ## 1.4. Visualize
 왼쪽 메뉴에서 visualize tab을 선택한다.  
