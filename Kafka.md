@@ -85,15 +85,15 @@ topic
     * log.retention.byte : 최대 record 보존 크기(byte)
 
 ### 2.3. Producer
-
-#### 2.3.1. producer 역할
-
-데이터를 카프카에 보낸다.  
+데이터를 kafka에 보낸다.  
 대량의 클릭로그들을 실시간으로 kafka에 적재할 수 있다.  
+#### 2.3.1. producer 역할
+1. topic에 해당하는 메시지를 생성
+2. 특정 topic으로 데이터를 publish
+3. 전송 성공여부를 알 수 있어, 처리 실패시 재시도
 
-* topic에 해당하는 메시지를 생성
-* 특정 topic으로 데이터를 publish
-* 전송 성공여부를 알 수 있어, 처리 실패시 재시도
+![ELK_kafka_producer](./elk_image/ELK_kafka_producer.png)  
+<producer>  
 
 #### 2.3.2. 코딩 (간단히만)
 * 아파치 kafka 라이브러리를 추가한다.
@@ -102,6 +102,48 @@ topic
 * key : 메시지를 보내면, 토픽의 파티션이 지정될 때 쓰인다.
 * key는 해시알고리즘에 의해 partition과 1:1 매칭되고, 이에 따라 value가 저장된다.
 * topic에 파티션을 추가하는 순간, key와 partition의 일관성이 보장되지 않는다. 
+
+### 2.4. Consumer
+* 데이터를 kafka로 부터 가져온다.  
+* 데이터를 가져오더라도, partition에서 이미 읽힌 record는 사라지지 않는다.  
+* 데이터 파이프라인의 특성을 갖는다.  
+
+![ELK_kafka_consumer](./elk_image/ELK_kafka_consumer.png)  
+<consumer>  
+
+polling  
+* partition에 저장된 데이터를 가져오는 것.  
+#### 2.4.1. consumer 역할
+1. topic의 partition으로부터 데이터 polling
+2. partition offset 위치 기록(commit)
+3. consumer group을 통해 병렬처리
+
+offset
+* topic과 partition 별로 지정된다.
+* consumer가 데이터를 어느 지점까지 읽었는지 나타낸다.
+* consumer가 데이터를 읽기 시작하면 offset을 commit하게 되는데 이 정보는 kafka의 \_\_consumer_offset에 저장된다.
+* consumer의 offset이 kafka에 저장되어있으므로, consumer에 이슈가 발생하더라도 복구가 가능하다.
+
+![ELK_kafka_offset](./elk_image/ELK_kafka_offset.png)  
+<consumer의 offset>  
+
+#### 2.4.2. multiple consumer
+
+ex) partition이 두개인 경우  
+if) cunsumer가 1개라면  
+then) 하나의 consumer가 2개의 partition에서 데이터를 가져온다.  
+if) consumer가 2개라면  
+then) 2개의 cunsumer가 각각 partition 하나씩 맡아 데이터를 가져온다.  
+if) consumer가 3개라면  
+then) 이미 consumer가 하나씩 partition을 할당받았으므로, 하나의 consumer는 동작하지 않는다.  
+
+so, consumer를 병렬처리하려면 "partition 개수 >= consumer 개수" 여야 한다.  
+
+#### 2.4.3. Different groups
+consumer gruop과 topic 별로 kafka에 consumer offset을 나누어 저장하기 때문에 consumer group 별로 처리할 수 있는 것.
+
+![ELK_kafka_different_grp](./elk_image/ELK_kafka_different_grp.png)  
+<multiple consumer group>  
 
 # 3. Kafka의 핵심요소
 kafka의 고가용성을 유지하는데에 중요한 역할을 한다.  
@@ -114,17 +156,21 @@ broker 3대 중 1대에 해당 토픽의 데이터가 저장된다.
 
 
 ## 3.2. replication(복제)
-kafka 아키텍쳐의 핵심
-클러스터에서 서버에 장애가 생길 때, 가용성을 보장할 수 있다.
-파티션의 복제를 의미한다.
-replication의 개수가 1이라면 partition은 1개만 존재한다는 것.
-replication의 개수가 2라면 partition은 원본 1개와 복제본 1개로 총 2개가 존재한다.
-replication의 개수가 3이라면 partition은 원본 1개와 복제본 2개로 총 3개가 존재한다.
+kafka 아키텍쳐의 핵심  
+클러스터에서 서버에 장애가 생길 때, 가용성을 보장할 수 있다.  
+파티션의 복제를 의미한다.  
 
-broker 개수에 따라 replication 개수가 제한된다.
-원본 1개의 partition은 leader partition, 나머지 복제본 partition은 folower partition이라고 부른다.
+* replication의 개수가 1이라면 partition은 1개만 존재한다는 것.  
+* replication의 개수가 2라면 partition은 원본 1개와 복제본 1개로 총 2개가 존재한다.  
+* replication의 개수가 3이라면 partition은 원본 1개와 복제본 2개로 총 3개가 존재한다.  
 
-replication의 개수가 많아지면 그만큼 broker의 resource 사용량도 늘어난다.
+broker 개수에 따라 replication 개수가 제한된다.  
+원본 1개의 partition은 leader partition, 나머지 복제본 partition은 folower partition이라고 부른다.  
+
+replication의 개수가 많아지면 그만큼 broker의 resource 사용량도 늘어난다.  
+
+![ELK_kafka_replication](./elk_image/ELK_kafka_replication.png)  
+<partition 1개, replication 3개인 경우>
 
 ## 3.3. ISR(In Sync Replica)
 
@@ -135,20 +181,52 @@ replication은 partition의 고가용성을 위해 사용된다.
 broker가 어떠한 이유로 사용이 불가능해질 경우, 복제본이 있다면 복구가 가능하다.
 leader partition이 죽으면, follower partition이 leader partition 역할을 승계하게 된다.
 ## 3.4. ack
-0, 1, all 세가지 옵션 중 한 개를 골라 사용한다.
+0, 1, all 세가지 옵션 중 한 개를 골라 사용한다.  
 
 #### 0일 경우
-producer는 leader partition에 데이터를 전송하고 응답값을 받지 않는다. 
-so, leader에 데이터가 정상적으로 전송됐는지, 복제는 제대로 됐는지 알 수 없다.
-속도는 빠르지만 데이터 유실가능성이 있다.
+producer는 leader partition에 데이터를 전송하고 응답값을 받지 않는다.  
+so, leader에 데이터가 정상적으로 전송됐는지, 복제는 제대로 됐는지 알 수 없다.  
+속도는 빠르지만 데이터 유실가능성이 있다.  
 
 #### 1일 경우
-producer는 leader partition에 데이터를 전송하고 leader partition에 대해 응답값을 받는다.
-but, 나머지 partition에 복제됐는지 알 수 없다.
-leader partition이 데이터를 받은 즉시 broker에 장애가 생기면, 나머지 partition에 데이터가 전송되지 못한 상태이므로 ack 0일 경우와 같은 데이터 유실 가능성이 있다.
+producer는 leader partition에 데이터를 전송하고 leader partition에 대해 응답값을 받는다.  
+but, 나머지 partition에 복제됐는지 알 수 없다.  
+leader partition이 데이터를 받은 즉시 broker에 장애가 생기면, 나머지 partition에 데이터가 전송되지 못한 상태이므로 ack 0일 경우와 같은 데이터 유실 가능성이 있다.  
 
 #### all일 경우
-producer는 leader partition에 데이터를 전송하고 leader partition과 follower partition에대해 응답값을 받는다.
-데이터 유실 가능성이 없으나, 속도가 현저히 느리다.
+producer는 leader partition에 데이터를 전송하고 leader partition과 follower partition에대해 응답값을 받는다.  
+데이터 유실 가능성이 없으나, 속도가 현저히 느리다.  
 
-# 4. kafka의 미래
+# 4. Lag
+## 4.1. lag
+* producer가 데이터를 넣어주는 속도가 consumer가 가져가는 속도보다 빠른 경우 발생
+* producer가 마지막으로 넣은 offset과 consumer가 마지막으로 읽은 offset간에 gap이 생기게 된다.
+* 그 gap을 consumer lag라고 한다.
+
+![ELK_kafka_lag_1](./elk_image/ELK_kafka_lag_1.png)  
+<multiple consumer group>  
+
+consumer가 비정상적으로 동작하면 lag이 필연적으로 발생한다.
+
+* partition의 개수가 여러개이면 lag도 여러개 존재할 수 있다. 
+* 그 중 가장 높은 숫자의 lag을 records-lag-max라 부른다.
+
+![ELK_kafka_lag_2](./elk_image/ELK_kafka_lag_2.png)  
+<multiple consumer group> 
+   
+## 4.2. Burrow
+* Kafka-client 라이브러리를 통해 kafkaconsumer 객체를 만들 수 있고, 이를 통해 lag을 얻을 수 있다.
+* But, consumer 단위로 lag을 모니터링하는 것은 위험하며, 운영요소가 많이 소비된다.
+* So, Burrow 사용하자.
+
+### Burrow 특징
+* 오픈소스로서, golang으로 작성되었다.
+
+1. 멀티 kafka 클러스터를 지원한다.
+   * kafka 클러스터가 여러개더라도, burrow application 1개만 실행해서 연동하면 kafka 클러스터들에 붙은 consumer의 lag을 모두 모니터링할 수 있다.
+2. sliding window를 통한 consumer의 status 확인
+   * sliding window를 통해 consumer의 status를 'ERROR', 'WARNING', 'OK'로 표현한다.
+   * 데이터 양이 일시적으로 많아지며, consumer offset이 증가되고 있으면 WARNING
+   * 데이터 양이 많아지는데 consumer가 데이터를 가져가지 않으면 ERROR
+3. HTTP api 제공
+
