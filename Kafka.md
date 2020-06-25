@@ -5,12 +5,12 @@
 * 데이터를 전송하는 source application과 데이터를 받는 target application이 존재   
 * 처음에는 간단한 단방향 통신을 수행한다.  
 
-![ELK_kafka_one](./elk_image/ELK_kafka_one.png)  
+![ELK_kafka_one](./elk_image/ELK_kafka_one.PNG)  
 <초기의 간단한 단방향 통신>  
 
 * 이후 시간이 지나며 source, target applicaiton이 많아지면서 데이터를 전송하는 line이 복잡해진다.  
 
-![ELK_kafka_comp](./elk_image/ELK_kafka_comp.png)  
+![ELK_kafka_comp](./elk_image/ELK_kafka_comp.PNG)  
 <후기의 복잡한 데이터 통신>  
 
 * 데이터 전송 line이 많아지면, 배포와 장애에 대응하기 어려워진다.  
@@ -22,14 +22,14 @@ apache kafka는 이러한 복잡함을 해결하기 위한 오픈소스이다.
 * source -> kafka -> target 의 형식으로 데이터가 전송된다.   
 * source application에서 보낼 수 있는 데이터 포맷에는 거의 제한이 없다. ex) json, tsv, avro, ...
 
-![ELK_kafka_dataflow](./elk_image/ELK_kafka_dataflow.png)  
+![ELK_kafka_dataflow](./elk_image/ELK_kafka_dataflow.PNG)  
 <kafka의 data flow>  
 
 Kafka는 큐와 비슷하다.  
 * 큐에 데이터를 넣는 역할은 producer가, 데이터를 가져가는 역할은 consumer가 하게 된다.  
 +) producer, consumer는 library로 구현이 가능하다.  
 
-![ELK_kafka_queue](./elk_image/ELK_kafka_queue.png)  
+![ELK_kafka_queue](./elk_image/ELK_kafka_queue.PNG)  
 <kafka의 논리적 queue>  
 
 ### 1.2. Kafka의 특징
@@ -49,7 +49,7 @@ topic
 
 +) AMQP(Advanced Message Queuing Protocol) : 메시지 지향 미들웨어를 위한 개방형 표준 응용 계층 프로토콜.  
 
-![ELK_kafka_topic](./elk_image/ELK_kafka_topic.png)  
+![ELK_kafka_topic](./elk_image/ELK_kafka_topic.PNG)  
 <kafka topic>  
 
 * producer가 data를 넣고, consumer가 data를 가져간다.
@@ -69,7 +69,7 @@ topic
     * 조건 : consumer group이 달라야한다. auto.offset.reset=earliest로 setting 돼있어야 한다.  
 * 분석 및 시각화하기 위해 ES에 저장하거나, click log를 백업하기 위해 hadoop에 저장할 수 도 있다.
 
-![ELK_kafka_topic_2](./elk_image/ELK_kafka_topic_2.png)  
+![ELK_kafka_topic_2](./elk_image/ELK_kafka_topic_2.PNG)  
 <kafka topic 내부구조>  
 
 #### 파티션이 두개 이상인 경우  
@@ -92,7 +92,7 @@ topic
 2. 특정 topic으로 데이터를 publish
 3. 전송 성공여부를 알 수 있어, 처리 실패시 재시도
 
-![ELK_kafka_producer](./elk_image/ELK_kafka_producer.png)  
+![ELK_kafka_producer](./elk_image/ELK_kafka_producer.PNG)  
 <producer>  
 
 #### 2.3.2. 코딩 (간단히만)
@@ -108,7 +108,7 @@ topic
 * 데이터를 가져오더라도, partition에서 이미 읽힌 record는 사라지지 않는다.  
 * 데이터 파이프라인의 특성을 갖는다.  
 
-![ELK_kafka_consumer](./elk_image/ELK_kafka_consumer.png)  
+![ELK_kafka_consumer](./elk_image/ELK_kafka_consumer.PNG)  
 <consumer>  
 
 polling  
@@ -142,7 +142,7 @@ so, consumer를 병렬처리하려면 "partition 개수 >= consumer 개수" 여�
 #### 2.4.3. Different groups
 consumer gruop과 topic 별로 kafka에 consumer offset을 나누어 저장하기 때문에 consumer group 별로 처리할 수 있는 것.
 
-![ELK_kafka_different_grp](./elk_image/ELK_kafka_different_grp.png)  
+![ELK_kafka_different_grp](./elk_image/ELK_kafka_different_grp.png)   
 <multiple consumer group>  
 
 # 3. Kafka의 핵심요소
@@ -169,7 +169,7 @@ broker 개수에 따라 replication 개수가 제한된다.
 
 replication의 개수가 많아지면 그만큼 broker의 resource 사용량도 늘어난다.  
 
-![ELK_kafka_replication](./elk_image/ELK_kafka_replication.png)  
+![ELK_kafka_replication](./elk_image/ELK_kafka_replication.PNG)  
 <partition 1개, replication 3개인 경우>
 
 ## 3.3. ISR(In Sync Replica)
@@ -203,7 +203,7 @@ producer는 leader partition에 데이터를 전송하고 leader partition과 fo
 * producer가 마지막으로 넣은 offset과 consumer가 마지막으로 읽은 offset간에 gap이 생기게 된다.
 * 그 gap을 consumer lag라고 한다.
 
-![ELK_kafka_lag_1](./elk_image/ELK_kafka_lag_1.png)  
+![ELK_kafka_lag_1](./elk_image/ELK_kafka_lag_1.PNG)  
 <multiple consumer group>  
 
 consumer가 비정상적으로 동작하면 lag이 필연적으로 발생한다.
@@ -211,7 +211,7 @@ consumer가 비정상적으로 동작하면 lag이 필연적으로 발생한다.
 * partition의 개수가 여러개이면 lag도 여러개 존재할 수 있다. 
 * 그 중 가장 높은 숫자의 lag을 records-lag-max라 부른다.
 
-![ELK_kafka_lag_2](./elk_image/ELK_kafka_lag_2.png)  
+![ELK_kafka_lag_2](./elk_image/ELK_kafka_lag_2.PNG)  
 <multiple consumer group> 
    
 ## 4.2. Burrow
