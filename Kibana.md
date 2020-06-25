@@ -41,7 +41,7 @@ Absolute 필드
 
 * 원하는 정보만 보고 싶으면 table에서 돋보기 형태를 클릭하여 그래프에 원하는 정보만 띄울 수 있다.  
 * table에서 원하는 정보만 보고 싶다면, toggle 버튼을 클릭하여 table에 원하는 정보만 띄울 수 있다.  
-![ELK_modify_toggle_1](./elk_image/ELK_modify_toggle_1.png)  
+![ELK_modify_toggle_1](./elk_image/ELK_modify_toggle_1.jpg)  
 <화살표가 가리키는 ▶ 표시를 클릭하여 document를 크게 확인한다.>  
 
 ![ELK_modify_toggle_result](./elk_image/ELK_modify_toggle_result.png)  
