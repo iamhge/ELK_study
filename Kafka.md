@@ -269,6 +269,15 @@ coordination service의 장애는 전체 시스템의 장애를 유발한다.
 * 상태정보를 znode라는 곳에 key-value 형태로 저장한다.
 * znode에 저장된 key-value를 이용해 분산 application끼리 데이터를 주고받는다.
 
+#### zookeeper 서버
+zookeeper 서버는 일반적으로 3대 이상을 사용하며 서버 수는 주로 홀수로 구성한다.  
+서버간의 데이터 불일치 발생시 데이터 보정이 필요한데, 이때 과반수의 룰을 적용하므로 서버 수를 홀수로 구성하는 것이 데이터정합성 측면에서 유리하기 때문이다.  
+leader와 follower로 서버가 구성되어, 서버들끼리 자동으로 leader를 선정한다.  
+클라이언트에서 server(follower)로 데이터 저장을 시도할 때, server(follower) -> server(leader) -> 나머지 server(follower)로 데이터를 전달하는 구조이다.  
+모든 서버가 동일한 데이터를 갖고 있고, 클라이언트에게 데이터 저장 성공여부를 알린다.  
+
+데이터의 변경이 자주 발생하는 서비스에서 zookeeper를 데이터 저장소로 사용하는 것은 좋지 X
+
 #### znode
 * 자식노드를 가진 계층형 구조
 * znode의 데이터가 변경될 때마다 znode의 version 번호는 증가한다. 
