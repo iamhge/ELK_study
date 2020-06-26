@@ -82,7 +82,7 @@ topic
 * 키가 있고 기본 파티셔너를 사용할 경우, 키의 해시값을 구하고 특정 파티션에 할당된다.
 
 ![ELK_kafka_partition_2](./elk_image/ELK_kafka_partition_2.png)  
-<round-robin 방식으로 data 넣은 경우>  
+<특정 partition에 data 넣은 경우>  
 
 * 파티션을 늘리는 것은 가능하지만, 줄이는 것은 불가능하다.
 * 파티션을 늘리면 consumer의 개수를 늘려서 data 처리를 분산시킬 수 있다.
