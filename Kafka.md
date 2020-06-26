@@ -184,10 +184,10 @@ replication의 개수가 많아지면 그만큼 broker의 resource 사용량도 
 
 leader partition + follower partition = ISR
 
-replication을 사용하는 이유?
-replication은 partition의 고가용성을 위해 사용된다.
-broker가 어떠한 이유로 사용이 불가능해질 경우, 복제본이 있다면 복구가 가능하다.
-leader partition이 죽으면, follower partition이 leader partition 역할을 승계하게 된다.
+replication을 사용하는 이유?  
+* replication은 partition의 고가용성을 위해 사용된다.  
+* broker가 어떠한 이유로 사용이 불가능해질 경우, 복제본이 있다면 복구가 가능하다.  
+* leader partition이 죽으면, follower partition이 leader partition 역할을 승계하게 된다.  
 ## 3.4. ack
 0, 1, all 세가지 옵션 중 한 개를 골라 사용한다.  
 
