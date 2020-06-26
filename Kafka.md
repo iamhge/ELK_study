@@ -238,3 +238,38 @@ consumer가 비정상적으로 동작하면 lag이 필연적으로 발생한다.
    * 데이터 양이 많아지는데 consumer가 데이터를 가져가지 않으면 ERROR
 3. HTTP api 제공
 
+## 4.3. CMAK
+CMAK는 kafka 클러스터를 관리하는 tool이다.  
+### 4.3.1. CMAK의 역할
+* 클러스터 관리
+* 쉬운 클러스터 상태 검사(topic, consumer, offset, broker, replica distribution, partition distribution)
+* replica election 선택 실행
+* 사용할 broker 선택 옵션으로 partition 할당 실행
+* partition 재할당 (생성된 할당을 기반으로?)
+* 선택적 topic구성으로 topic 생성 (0.8.1.1은 0.8.2+와 다른 config 가짐)
+* topic 삭제 (0.8.2+에서만 지원)
+* topic 리스트에 삭제표시된 topic이 표시된다. (0.8.2+ 에서만 지원)
+* 사용할 broker 선택 옵션으로 multiple topic에 대한 partition 할당 일괄 생성
+* 기존 topic에 partition 추가
+* 기존 topic의 config(구성) update
+* broker level과 topic level metric에 대해 polling한다.
+* zookeeper에서, ids/owners/&offsets/directories가 없는 consumer들을 필터링한다.
+
+주키퍼에 대한 내용은 bcho.tistory.com/1016, twowinsh87.github.io/etc/2018/08/02/etc-kafka-2/ 참고  
+
+* 분산 시스템 설계시, 분산된 시스템간의 정보를 어떻게 공유할 것이며 클러스터에 있는 서버들의 상태를 체크하고, 분산 서비스들간에 동기화를 위한 락을 처리하는 방법 등이 문제가 된다. 
+* 코디네이션 서비스 시스템(coordination service)은 위와 같은 문제를 해결하고, 대표적인 것이 zookeeper이다.
+
+### 4.3.1. zookeeper
+coordination service의 장애는 전체 시스템의 장애를 유발한다.  
+따라서 zookeeper는 시스템 내에서 중요한 상태 정보나 설정 정보 등을 유지하므로 고가용성이 보장돼야한다.  
+
+* zookeeper는 디렉토리 형태의 데이터 저장소이다.
+* 분산되어있는 각 application의 정보를 중앙에 집중하고 구성 관리, 그룹 관리 네이밍, 동기화 등을 제공한다.
+* 상태정보를 znode라는 곳에 key-value 형태로 저장한다.
+* znode에 저장된 key-value를 이용해 분산 application끼리 데이터를 주고받는다.
+
+#### znode
+* 자식노드를 가진 계층형 구조
+* znode의 데이터가 변경될 때마다 znode의 version 번호는 증가한다. 
+* zookeeper에 저장되는 데이터는 메모리에 저장되므로, 처리량이 크고 속도가 빠르다.
