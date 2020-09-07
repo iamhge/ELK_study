@@ -4,7 +4,7 @@
 ### 1.1. ES의 data flow
 ex) document 1, 2, 3에 따라 name과 professor가 채워져있다.  
 1. document들을 Text에 따라 매칭시켜, indexing한다.  
-2. 저장한 index를 사용자가 search한다.
+2. 저장한 index를 사용자가 search한다.  
 ![ES_dataflow](./elk_image/ES_dataflow.PNG)  
 <elasticsearch의 data flow>  
 
